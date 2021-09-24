@@ -66,7 +66,7 @@ int main(int argc, char** argv)
 #else
 
 /*
-    multi-threads test
+    multi-thread test
 */
 
 /*
