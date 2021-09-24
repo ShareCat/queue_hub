@@ -1,34 +1,36 @@
-#include "queue.h"
+#include "priqueue.h"
 
 /*
  * Adds a node of a given priority to the queue. Since a node is
  * allocated from a fixed size buffer pool, this function blocks
  * if pool has no free buffer object.
  */
-void add_a_node(ptable* p, node** last, node** m, char* key, int priority)
+void priqueue_add_a_node(ptable* p, node** last, node** m, char* val, int priority)
 {
     ASSERT(p);
 
     LOCK(p->lock);
     node *n = NULL;
 
-    n = (node*)get_buf(p);
+    n = (node*)priqueue_get_buf(p);
 
+#ifdef DEBUG
     LOG3("oo-get_data-oo\n");
-    display_buf_pool(p);
+    priqueue_display_buf_pool(p);
     LOG3("---get_data--\n");
+#endif
 
     if (NULL == n) {
         LOG2("Buf pool is over. Waiting for dequeue\n");
         pthread_cond_wait(&p->cv, &p->lock);
-        n = (node*)get_buf(p);
+        n = (node*)priqueue_get_buf(p);
         LOG2("Producer: wait over. Got a buffer back\n");
     }
 
     /*
      * Collided nodes are arranged in a list (queue)
      */
-    n->key = key;
+    n->val = val;
     n->priority = priority;
     n->next = NULL;
 
@@ -49,7 +51,7 @@ void add_a_node(ptable* p, node** last, node** m, char* key, int priority)
 /*
  * Gets a buffer from the buffer pool
  */
-void* get_buf(ptable *p)
+void* priqueue_get_buf(ptable *p)
 {
     /*
      * Check if we have at least two nodes
@@ -69,7 +71,7 @@ void* get_buf(ptable *p)
 /*
  * Returns a buffer to buffer pool
  */
-void put_buf(ptable* p, void* buf)
+void priqueue_put_buf(ptable* p, void* buf)
 {
     if (p->buf_pool) {
         node* head = (node*)buf;
@@ -82,7 +84,7 @@ void put_buf(ptable* p, void* buf)
     }
 }
 
-void display_buf_pool(ptable* p)
+void priqueue_display_buf_pool(ptable* p)
 {
     ASSERT(p);
 
@@ -95,7 +97,7 @@ void display_buf_pool(ptable* p)
     }
 }
 
-void create_pool(ptable** p, uint32_t num)
+void priqueue_create_pool(ptable** p, uint32_t num)
 {
     node* head = NULL;
     node* temp = NULL;
@@ -121,7 +123,7 @@ void create_pool(ptable** p, uint32_t num)
     }
 
 #ifdef DEBUG
-    display_buf_pool(*p);
+    priqueue_display_buf_pool(*p);
 #endif
 
 }
@@ -129,7 +131,7 @@ void create_pool(ptable** p, uint32_t num)
 /*
  * Create a priority queue object of priority ranging from 0..PRIMAX-1
  */
-void create(ptable* p)
+void priqueue_create(ptable* p)
 {
     ASSERT(p);
 
@@ -144,7 +146,7 @@ void create(ptable* p)
         p->last[i] = NULL;
     }
 
-    create_pool(&p, BUF_POOL_SIZE);
+    priqueue_create_pool(&p, BUF_POOL_SIZE);
 
     p->stats = malloc(sizeof(queue_stats));
 
@@ -158,20 +160,20 @@ void create(ptable* p)
 /*
  * Adds a node to the queue
  */
-void put_data(ptable* p, char* key, int priority)
+void priqueue_put_data(ptable* p, char* val, int priority)
 {
     ASSERT(p);
     ASSERT(priority < PRI_MAX);
 
-    add_a_node(p, &(p->last[priority]), &(p->entry[priority].n),
-               key, priority);
+    priqueue_add_a_node(p, &(p->last[priority]), &(p->entry[priority].n),
+               val, priority);
 }
 
 /*
  * Gets the highest priority node from the queue. If queue is empty,
  * then this routine blocks.
  */
-void get_data(ptable* p, char** key, int* pri)
+void priqueue_get_data(ptable* p, char** val, int* pri)
 {
     ASSERT(p);
 
@@ -194,16 +196,16 @@ wait_again:
         if (NULL != p->entry[i].n) {
             temp = (p->entry[i].n);
 
-            *key = p->entry[i].n->key;
+            *val = p->entry[i].n->val;
             *pri = p->entry[i].n->priority;
 
             p->entry[i].n = temp->next;
 
             LOG(" Dequeued: %d\n", p->stats->dequeue++);
-            put_buf(p, temp);
+            priqueue_put_buf(p, temp);
 #ifdef DEBUG
             LOG3("oo-put_data-oo\n");
-            display_buf_pool(p);
+            priqueue_display_buf_pool(p);
             LOG3("---put_data--\n");
 #endif
             pthread_cond_signal(&p->cv);
@@ -215,6 +217,7 @@ wait_again:
     p->is_available = false;
     goto wait_again;
 }
+
 #if 0
 /*
  * Test code
@@ -241,7 +244,7 @@ void* producer(void* p)
         /*
          * Using max bucket as (MAX_PRI - 1)
          */
-        put_data(p, i++, (i % 9));
+        priqueue_put_data(p, i++, (i % 9));
     }
 }
 
@@ -250,15 +253,15 @@ void* consumer(void* p)
     sleep(2);
     ptable *table = (ptable*)p;
 
-    int key, priority;
+    int val, priority;
 
     printf("Thread consumer\n");
     int i = 0;
 
     while (1) {
         printf("Calling get_data\n");
-        get_data(p, &key, &priority);
-        printf("\nSearch-> Priority=%d key= %d\n", priority, key);
+        priqueue_get_data(p, &val, &priority);
+        printf("\nSearch-> Priority=%d val= %d\n", priority, val);
 
         /*
          * We break the consumer after dequeuing 16 messages.
@@ -287,7 +290,7 @@ void cleanup(ptable *p)
 int main()
 {
     ptable *p = malloc(sizeof(ptable));
-    create(p);
+    priqueue_create(p);
 
     pthread_t thread1, thread2;
 
@@ -304,10 +307,11 @@ int main()
     cleanup(p);
 }
 #endif
+
 /*
  * Function to display the queue
  */
-void display(ptable* p)
+void priqueue_display(ptable* p)
 {
     ASSERT(p);
     int i = 0;
@@ -317,8 +321,8 @@ void display(ptable* p)
         t = p->entry[i].n;
 
         while (t) {
-            printf("\nBucket=%d Key=%s Priority=%d\n", p->entry[i].priority,
-                   t->key,
+            printf("\nBucket=%d val=%s Priority=%d\n", p->entry[i].priority,
+                   t->val,
                    t->priority);
             t = t->next;
         }

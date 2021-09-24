@@ -39,7 +39,7 @@ int priority[PRI_MAX];
  * List of nodes in a hash bucket
  */
 typedef struct node_ {
-    char *key;
+    char *val;
     int priority;
     struct node_* next;
 } node;
@@ -66,18 +66,18 @@ typedef struct ptable_ {
     queue_stats *stats;
 } ptable;
 
-void create(ptable*);
-void get_data(ptable*, char**, int*);
-void put_data(ptable*, char* key, int priority);
-void destroy(ptable*);
-void display(ptable*);
-void put_buf(ptable* p, void* buf);
-void create_pool(ptable** p, uint32_t num);
-void* get_buf(ptable* p);
-void display_buf_pool(ptable* p);
+void priqueue_create(ptable*);
+void priqueue_get_data(ptable*, char**, int*);
+void priqueue_put_data(ptable*, char* val, int priority);
+void priqueue_destroy(ptable*);
+void priqueue_display(ptable*);
+void priqueue_put_buf(ptable* p, void* buf);
+void priqueue_create_pool(ptable** p, uint32_t num);
+void* priqueue_get_buf(ptable* p);
+void priqueue_display_buf_pool(ptable* p);
 
 /*
  * Helper functions
  */
 
-void add_a_node(ptable* p, node** last, node** m, char* key, int priority);
+void priqueue_add_a_node(ptable* p, node** last, node** m, char* val, int priority);

@@ -4,57 +4,57 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <limits.h>
-#include "queue.h"
+#include "priqueue.h"
 
 int main(int argc, char** argv)
 {
 
-    char *key;
+    char *val;
     int priority;
 
     ptable *p = malloc(sizeof(ptable));
-    create(p);
+    priqueue_create(p);
 
     printf("priqueue \n");
 
-    put_data(p, "this is 1", 1);
-    put_data(p, "this is 4", 4);
-    put_data(p, "this is 2", 2);
-    put_data(p, "this is 51", 5);
-    put_data(p, "this is 5", 4);
-    put_data(p, "this is 61", 6);
-    put_data(p, "this is 3", 3);
-    put_data(p, "this is 6", 4);
+    priqueue_put_data(p, "this is 1", 1);
+    priqueue_put_data(p, "this is 4", 4);
+    priqueue_put_data(p, "this is 2", 2);
+    priqueue_put_data(p, "this is 51", 5);
+    priqueue_put_data(p, "this is 5", 4);
+    priqueue_put_data(p, "this is 61", 6);
+    priqueue_put_data(p, "this is 3", 3);
+    priqueue_put_data(p, "this is 6", 4);
 
-    display(p);
+    priqueue_display(p);
     printf("--------------------- \n");
 
-    get_data(p, &key, &priority);
+    priqueue_get_data(p, &val, &priority);
 
-    display(p);
+    priqueue_display(p);
     printf("--------------------- \n");
 
-    get_data(p, &key, &priority);
+    priqueue_get_data(p, &val, &priority);
 
-    display(p);
+    priqueue_display(p);
     printf("--------------------- \n");
 
-    put_data(p, "5", 4);
-    put_data(p, "5", 4);
+    priqueue_put_data(p, "5", 4);
+    priqueue_put_data(p, "5", 4);
 
-    get_data(p, &key, &priority);
+    priqueue_get_data(p, &val, &priority);
 
-    display(p);
+    priqueue_display(p);
     printf("--------------------- \n");
 
-    get_data(p, &key, &priority);
+    priqueue_get_data(p, &val, &priority);
 
-    display(p);
+    priqueue_display(p);
     printf("--------------------- \n");
 
-    get_data(p, &key, &priority);
+    priqueue_get_data(p, &val, &priority);
 
-    display(p);
+    priqueue_display(p);
     printf("--------------------- \n");
 
 }
