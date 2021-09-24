@@ -8,7 +8,7 @@
 
 #if 0
 /*
-    单线程简单测试
+    single thread test
 */
 int main(int argc, char** argv)
 {
@@ -66,7 +66,7 @@ int main(int argc, char** argv)
 #else
 
 /*
-    多线程测试
+    multi-threads test
 */
 
 /*
