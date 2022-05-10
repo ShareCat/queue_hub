@@ -137,6 +137,8 @@ void priqueue_create(ptable* p)
 
     int i = 0;
 
+    memset(p, 0x00, sizeof(ptable));
+
     /*
      * Initialize the entries
      */
