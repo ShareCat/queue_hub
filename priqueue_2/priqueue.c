@@ -171,6 +171,19 @@ void priqueue_put_data(ptable* p, char* val, int priority)
                val, priority);
 }
 
+int priqueue_available_update(ptable* p)
+{
+    int i = 0;
+    for (i = 0; i < PRI_MAX; i++) {
+        if (NULL != p->entry[i].n) {
+            return 1;
+        }
+    }
+
+    p->is_available = false;
+    return 0;
+}
+
 /*
  * Gets the highest priority node from the queue. If queue is empty,
  * then this routine blocks.
@@ -205,6 +218,7 @@ wait_again:
 
             LOG(" Dequeued: %d\n", p->stats->dequeue++);
             priqueue_put_buf(p, temp);
+            priqueue_available_update(p);
 #ifdef DEBUG
             LOG3("oo-put_data-oo\n");
             priqueue_display_buf_pool(p);
