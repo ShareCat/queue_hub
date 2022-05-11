@@ -5,7 +5,7 @@
  * allocated from a fixed size buffer pool, this function blocks
  * if pool has no free buffer object.
  */
-void priqueue_add_a_node(ptable* p, node** last, node** m, char* val, int priority)
+void priqueue_add_a_node(ptable* p, node** last, node** m, void* val, int priority)
 {
     ASSERT(p);
 
@@ -97,7 +97,7 @@ void priqueue_display_buf_pool(ptable* p)
     }
 }
 
-void priqueue_create_pool(ptable** p, uint32_t num)
+void priqueue_create_pool(ptable** p, int num)
 {
     node* head = NULL;
     node* temp = NULL;
@@ -162,7 +162,7 @@ void priqueue_create(ptable* p)
 /*
  * Adds a node to the queue
  */
-void priqueue_put_data(ptable* p, char* val, int priority)
+void priqueue_put_data(ptable* p, void* val, int priority)
 {
     ASSERT(p);
     ASSERT(priority < PRI_MAX);
@@ -188,7 +188,7 @@ int priqueue_available_update(ptable* p)
  * Gets the highest priority node from the queue. If queue is empty,
  * then this routine blocks.
  */
-void priqueue_get_data(ptable* p, char** val, int* pri)
+void priqueue_get_data(ptable* p, void** val, int* pri)
 {
     ASSERT(p);
 
@@ -234,6 +234,22 @@ wait_again:
     goto wait_again;
 }
 
+
+/*
+ * check priqueue is available or not
+ */
+int priqueue_is_available(ptable* p)
+{
+    ASSERT(p);
+
+    if (p->is_available) {
+        return true;
+    } else {
+        return false;
+    }
+}
+
+
 /*
  * Function to display the queue
  */
@@ -248,7 +264,7 @@ void priqueue_display(ptable* p)
 
         while (t) {
             printf("\nBucket=%d val=%s Priority=%d\n", p->entry[i].priority,
-                   t->val,
+                   (char *)t->val,
                    t->priority);
             t = t->next;
         }

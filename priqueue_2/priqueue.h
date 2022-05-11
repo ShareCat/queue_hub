@@ -4,10 +4,12 @@
 #include "assert.h"
 #include "string.h"
 
+#ifndef __PRIQUEUE_H__
+#define __PRIQUEUE_H__
+
 #define ASSERT(x) assert(x)
-#define PRI_MAX 10
-#define BUF_POOL_SIZE 1024
-#define uint32_t int
+#define PRI_MAX 8
+#define BUF_POOL_SIZE 32
 
 #if 0
     #define LOG   printf
@@ -39,7 +41,7 @@ int priority[PRI_MAX];
  * List of nodes in a hash bucket
  */
 typedef struct node_ {
-    char *val;
+    void *val;
     int priority;
     struct node_* next;
 } node;
@@ -67,12 +69,13 @@ typedef struct ptable_ {
 } ptable;
 
 void priqueue_create(ptable*);
-void priqueue_get_data(ptable*, char**, int*);
-void priqueue_put_data(ptable*, char* val, int priority);
+void priqueue_get_data(ptable*, void**, int*);
+int priqueue_is_available(ptable* p);
+void priqueue_put_data(ptable*, void* val, int priority);
 void priqueue_destroy(ptable*);
 void priqueue_display(ptable*);
 void priqueue_put_buf(ptable* p, void* buf);
-void priqueue_create_pool(ptable** p, uint32_t num);
+void priqueue_create_pool(ptable** p, int num);
 void* priqueue_get_buf(ptable* p);
 void priqueue_display_buf_pool(ptable* p);
 
@@ -80,4 +83,6 @@ void priqueue_display_buf_pool(ptable* p);
  * Helper functions
  */
 
-void priqueue_add_a_node(ptable* p, node** last, node** m, char* val, int priority);
+void priqueue_add_a_node(ptable* p, node** last, node** m, void* val, int priority);
+
+#endif  /* __PRIQUEUE_H__ */
