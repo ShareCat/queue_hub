@@ -171,7 +171,7 @@ void priqueue_put_data(ptable* p, void* val, int priority)
                val, priority);
 }
 
-int priqueue_available_update(ptable* p)
+static int priqueue_available_update(ptable* p)
 {
     int i = 0;
     for (i = 0; i < PRI_MAX; i++) {
